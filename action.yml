@@ -13,9 +13,9 @@ runs:
   using: "composite"
   steps:
     - run: |
-        ls -la
-        chmod +x setup.sh
-        ./setup.sh ${{ inputs.method }} \
+        ls -la ecops-action
+        chmod +x ecops-action/setup.sh
+        ecops-action/setup.sh ${{ inputs.method }} \
           "${{ github.run_id }}" \
           "${{ github.ref_name }}" \
           "${{ github.repository }}" \
