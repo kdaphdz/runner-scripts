@@ -13,9 +13,10 @@ runs:
   using: "composite"
   steps:
     - run: |
-        ls -la
-        chmod +x ./setup.sh
-        ./setup.sh ${{ inputs.method }} \
+        echo "Ejecutando en la ruta de la acción: ${{ github.action_path }}"
+        ls -la "${{ github.action_path }}"
+        chmod +x "${{ github.action_path }}/setup.sh"
+        "${{ github.action_path }}/setup.sh" ${{ inputs.method }} \
           "${{ github.run_id }}" \
           "${{ github.ref_name }}" \
           "${{ github.repository }}" \
