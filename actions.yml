@@ -1,0 +1,13 @@
+name: Setup Script Action
+description: Ejecuta setup.sh con el argumento task (start_measurement o end_measurement)
+
+inputs:
+  task:
+    description: Tarea a ejecutar
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - run: bash ${{ github.action_path }}/setup.sh ${{ inputs.task }}
+      shell: bash
