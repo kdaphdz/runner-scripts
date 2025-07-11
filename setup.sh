@@ -156,6 +156,27 @@ function end_measurement {
         "${upload_fields[@]}" \
         -F "original_name=$ORIGINAL_NAME"
     echo "[INFO] Reconstruction request sent."
+
+    REPORT_FILE="ecops-report.html"
+    {
+        echo "<html><head><title>EcOps Report</title></head><body>"
+        echo "<h1>EcOps Performance Report</h1>"
+        echo "<ul>"
+        echo "<li><strong>Run ID:</strong> $WATTSCI_RUN_ID</li>"
+        echo "<li><strong>Branch:</strong> $WATTSCI_BRANCH</li>"
+        echo "<li><strong>Repository:</strong> $WATTSCI_REPOSITORY</li>"
+        echo "<li><strong>Workflow:</strong> $WATTSCI_WORKFLOW_NAME</li>"
+        echo "<li><strong>Commit:</strong> $WATTSCI_COMMIT_HASH</li>"
+        echo "<li><strong>Method:</strong> $WATTSCI_METHOD</li>"
+        echo "<li><strong>Timer Start:</strong> $start_time</li>"
+        echo "<li><strong>Timer End:</strong> $end_time</li>"
+        echo "<li><strong>Session ID:</strong> $session_id</li>"
+        echo "</ul>"
+        echo "<p>Reporte generado automáticamente por EcOps.</p>"
+        echo "</body></html>"
+    } > "$REPORT_FILE"
+
+    echo "[INFO] HTML report generated at: $REPORT_FILE"
 }
 
 function baseline {
