@@ -149,13 +149,12 @@ function end_measurement {
     echo "[INFO] Requesting file reconstruction on server..."
     start_time=$(tail -n 1 "$TIMER_FILE_START")
     end_time=$(tail -n 1 "$TIMER_FILE_END")
-    curl -s -X POST "$SERVER_URL/reconstruct" \
+    response=$(curl -s -X POST "$SERVER_URL/reconstruct" \
         -F "session_id=$session_id" \
         -F "timer_start=$start_time" \
         -F "timer_end=$end_time" \
         "${upload_fields[@]}" \
-        -F "original_name=$ORIGINAL_NAME"
-    echo "[INFO] Reconstruction request sent."
+        -F "original_name=$ORIGINAL_NAME")
 
     summary_md=$(echo "$response" | sed -n 's/.*"summary_md": *"\([^"]*\)".*/\1/p' | sed 's/\\n/\n/g' | sed 's/\\"/"/g')
     
