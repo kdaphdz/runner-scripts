@@ -25,11 +25,10 @@ runs:
           ${{ inputs.args }}
       shell: bash
 
-    - name: Upload HTML Report
+    - name: Show EcOps Markdown Report
       if: inputs.method == 'end_measurement'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ecops-report
-        path: ecops-report.html
+      run: |
+        echo "### EcOps Performance Report"
+        cat ecops-report.md
 
 
