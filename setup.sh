@@ -157,23 +157,14 @@ function end_measurement {
         -F "original_name=$ORIGINAL_NAME"
     echo "[INFO] Reconstruction request sent."
 
-    REPORT_FILE="ecops-report.md"
-    {
-        echo "# EcOps Performance Report"
-        echo
-        echo "- **Run ID:** $WATTSCI_RUN_ID"
-        echo "- **Branch:** $WATTSCI_BRANCH"
-        echo "- **Repository:** $WATTSCI_REPOSITORY"
-        echo "- **Workflow:** $WATTSCI_WORKFLOW_NAME"
-        echo "- **Commit:** $WATTSCI_COMMIT_HASH"
-        echo "- **Method:** $WATTSCI_METHOD"
-        echo "- **Timer Start:** $start_time"
-        echo "- **Timer End:** $end_time"
-        echo "- **Session ID:** $session_id"
-        echo
-        echo "_Reporte generado automáticamente por EcOps._"
-    } > "$REPORT_FILE"
+    summary_md=$(echo "$response" | sed -n 's/.*"summary_md": *"\([^"]*\)".*/\1/p' | sed 's/\\n/\n/g' | sed 's/\\"/"/g')
     
+    echo "==== EcOps Performance Summary ===="
+    echo -e "$summary_md"
+    echo "==================================="
+    
+    REPORT_FILE="ecops-summary.md"
+    echo -e "$summary_md" > "$REPORT_FILE"
     echo "[INFO] Markdown report generated at: $REPORT_FILE"
 }
 
