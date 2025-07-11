@@ -13,10 +13,8 @@ runs:
   using: "composite"
   steps:
     - run: |
-        echo "Ejecutando en la ruta de la acción: ${{ github.action_path }}"
-        ls -la "${{ github.action_path }}"
-        chmod +x "${{ github.action_path }}/setup.sh"
-        "${{ github.action_path }}/setup.sh" ${{ inputs.method }} \
+        chmod +x setup.sh
+        ./setup.sh ${{ inputs.method }} \
           "${{ github.run_id }}" \
           "${{ github.ref_name }}" \
           "${{ github.repository }}" \
@@ -26,3 +24,11 @@ runs:
           "${{ github.event_name }}" \
           ${{ inputs.args }}
       shell: bash
+
+    - name: Upload HTML Report
+      if: inputs.method == 'end_measurement'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ecops-report
+        path: ecops-report.html
+
