@@ -13,8 +13,8 @@ runs:
   using: "composite"
   steps:
     - run: |
-        chmod +x setup.sh
-        ./setup.sh ${{ inputs.method }} \
+        chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+        "$GITHUB_ACTION_PATH/setup.sh" ${{ inputs.method }} \
           "${{ github.run_id }}" \
           "${{ github.ref_name }}" \
           "${{ github.repository }}" \
@@ -31,4 +31,5 @@ runs:
       with:
         name: ecops-report
         path: ecops-report.html
+
 
