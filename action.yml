@@ -30,5 +30,5 @@ runs:
       run: |
         echo "### EcOps Performance Report"
         cat ecops-report.md
-
+      shell: bash
 
