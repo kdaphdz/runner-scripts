@@ -25,10 +25,10 @@ runs:
           ${{ inputs.args }}
       shell: bash
 
-  - name: Show EcOps Markdown Report
-    if: inputs.method == 'end_measurement'
-    run: |
-      echo "### EcOps Performance Report" >> $GITHUB_STEP_SUMMARY
-      cat ecops-report.md >> $GITHUB_STEP_SUMMARY
-    shell: bash
+    - name: Show EcOps Markdown Report
+      if: inputs.method == 'end_measurement'
+      run: |
+        echo "### EcOps Performance Report" >> $GITHUB_STEP_SUMMARY
+        cat ecops-report.md >> $GITHUB_STEP_SUMMARY
+      shell: bash
 
