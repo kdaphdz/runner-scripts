@@ -29,6 +29,6 @@ runs:
       if: inputs.method == 'end_measurement'
       run: |
         echo "### EcOps Performance Report" >> $GITHUB_STEP_SUMMARY
-        cat ecops-report.md >> $GITHUB_STEP_SUMMARY
+        cat ecops-summary.md >> $GITHUB_STEP_SUMMARY
       shell: bash
 
