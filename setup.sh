@@ -158,10 +158,6 @@ function end_measurement {
 
     summary_md=$(echo "$response" | sed -n 's/.*"summary_md": *"\([^"]*\)".*/\1/p' | sed 's/\\n/\n/g' | sed 's/\\"/"/g')
     
-    echo "==== EcOps Performance Summary ===="
-    echo -e "$summary_md"
-    echo "==================================="
-    
     REPORT_FILE="ecops-summary.md"
     echo -e "$summary_md" > "$REPORT_FILE"
     echo "[INFO] Markdown report generated at: $REPORT_FILE"
