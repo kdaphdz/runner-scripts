@@ -157,6 +157,20 @@ function end_measurement {
         -F "original_name=$ORIGINAL_NAME")
 
     summary_md=$(echo "$response" | sed -n 's/.*"summary_md": *"\([^"]*\)".*/\1/p' | sed 's/\\n/\n/g' | sed 's/\\"/"/g')
+
+    local repo="${WATTSCI_REPOSITORY}"
+    local branch="${WATTSCI_BRANCH}"
+    local workflow="${WATTSCI_WORKFLOW_ID}"
+
+    local start_date="2025-07-02"
+    local end_date="2025-07-10"
+
+    local url="http://localhost:3000/wattsci?repo=${repo}&branch=${branch}&workflow=${workflow}&start_date=${start_date}&end_date=${end_date}"
+    summary_md="${summary_md}\n\n[Ver resultados en Wattsci](${url})"
+
+    REPORT_FILE="ecops-summary.md"
+    echo -e "$summary_md" > "$REPORT_FILE"
+    echo "[INFO] Markdown report generated at: $REPORT_FILE"
     
     REPORT_FILE="ecops-summary.md"
     echo -e "$summary_md" > "$REPORT_FILE"
