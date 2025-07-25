@@ -49,9 +49,9 @@ function compare_with_main {
     echo "[INFO] Comparing branches $base_branch vs $refactor_branch in repo $repo"
 
     response=$(curl -s -X POST "$COMPARE_API/wattsci/compare" \
-        -F "repo_url=$repo_url" \
+        -F "repo=$repo_url" \
         -F "base_branch=$base_branch" \
-        -F "new_branch=$refactor_branch" \
+        -F "refactor_branch=$refactor_branch" \
         -F "github_token=$github_token")
 
     echo "[INFO] API response:"
