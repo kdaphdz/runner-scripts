@@ -3,10 +3,14 @@ description: Start or end performance measurement using perf or trigger refactor
 
 inputs:
   method:
-    description: 'Method to use (start_measurement, end_measurement, refactor)'
+    description: 'Method to use (start_measurement, end_measurement, refactor, compare)'
     required: true
   args:
-    description: 'Extra arguments for perf or refactor (e.g., for perf: perf cpu-cycles instructions 1000; for refactor: repo_url branch github_token workflow_path)'
+    description: >
+      Extra arguments for perf, refactor or compare:
+      - for perf: perf cpu-cycles instructions 1000
+      - for refactor: repo_url branch github_token workflow_path commit_sha
+      - for compare: repo_url base_commit refactor_commit github_token
     required: false
 
 runs:
@@ -15,9 +19,15 @@ runs:
     - run: |
         chmod +x "$GITHUB_ACTION_PATH/setup.sh"
         chmod +x "$GITHUB_ACTION_PATH/refactor.sh"
+
         if [[ "${{ inputs.method }}" == "refactor" ]]; then
-          echo "[INFO] Running refactor.sh with args: ${{ inputs.args }}"
+          echo "[INFO] Running refactor.sh refactor_from_github with args: ${{ inputs.args }}"
           "$GITHUB_ACTION_PATH/refactor.sh" refactor_from_github ${{ inputs.args }}
+
+        elif [[ "${{ inputs.method }}" == "compare" ]]; then
+          echo "[INFO] Running refactor.sh compare_with_main with args: ${{ inputs.args }}"
+          "$GITHUB_ACTION_PATH/refactor.sh" compare_with_main ${{ inputs.args }}
+
         else
           "$GITHUB_ACTION_PATH/setup.sh" ${{ inputs.method }} \
             "${{ github.run_id }}" \
