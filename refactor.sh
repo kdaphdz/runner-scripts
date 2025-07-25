@@ -20,7 +20,7 @@ function refactor_from_github {
 
     echo "[INFO] Starting refactor_from_github for repo: $repo_url branch: $branch base_branch: $base_branch"
 
-    response=$(curl -s -X POST "$REFACTOR_API/wattsci/compare" \
+    response=$(curl -s -X POST "$REFACTOR_API/refactor_from_github" \
         -F "repo_url=$repo_url" \
         -F "branch=$branch" \
         -F "github_token=$github_token" \
@@ -48,7 +48,7 @@ function compare_with_main {
 
     echo "[INFO] Comparing branches $base_branch vs $refactor_branch in repo $repo"
 
-    response=$(curl -s -X POST "$COMPARE_API/compare_with_main" \
+    response=$(curl -s -X POST "$COMPARE_API/wattsci/compare" \
         -F "repo_url=$repo_url" \
         -F "base_branch=$base_branch" \
         -F "new_branch=$refactor_branch" \
