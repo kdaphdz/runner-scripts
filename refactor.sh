@@ -25,7 +25,7 @@ function refactor_from_github {
     response=$(curl -X POST "$SERVER_URL/refactor_from_github" \
         -F "repo_url=$repo_url" \
         -F "branch=$branch" \
-        -F "github_token=$github_token" \
+        -F "github_token=$github_token" )
     echo "[INFO] API call done"
     echo "$response"
 
