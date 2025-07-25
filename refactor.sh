@@ -68,20 +68,18 @@ function compare_with_main {
     local refactor_commit="$3"
     local github_token="$4"
 
-    # Extract owner and repo name from URL
-    if [[ "$repo_url" =~ github\.com[:/]+([^/]+)/([^/.]+)(\.git)? ]]; then
-        repo_owner="${BASH_REMATCH[1]}"
-        repo_name="${BASH_REMATCH[2]}"
+    # Extraer "owner/name" del repo_url
+    if [[ "$repo_url" =~ github\.com[:/]+([^/]+/[^/.]+)(\.git)? ]]; then
+        repo="${BASH_REMATCH[1]}"
     else
         echo "[ERROR] Could not parse repo_url: $repo_url" >&2
         exit 1
     fi
 
-    echo "[INFO] Comparing $base_commit vs $refactor_commit in $repo_owner/$repo_name"
+    echo "[INFO] Comparing $base_commit vs $refactor_commit in repo $repo"
 
-    response=$(curl -s -X POST "$COMPARE_API/compare_with_main" \
-        -F "repo_owner=$repo_owner" \
-        -F "repo_name=$repo_name" \
+    response=$(curl -s -X POST "$COMPARE_API/wattsci/compare" \
+        -F "repo=$repo" \
         -F "base_commit=$base_commit" \
         -F "refactor_commit=$refactor_commit" \
         -F "github_token=$github_token")
