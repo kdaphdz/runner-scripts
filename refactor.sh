@@ -22,11 +22,10 @@ function refactor_from_github {
     echo "[INFO] Starting refactor_from_github for repo: $repo_url branch: $branch"
 
     echo "[INFO] Calling API with repo_url=$repo_url branch=$branch"
-    response=$(curl -s -X POST "$SERVER_URL/refactor_from_github" \
+    response=$(curl -X POST "$SERVER_URL/refactor_from_github" \
         -F "repo_url=$repo_url" \
         -F "branch=$branch" \
         -F "github_token=$github_token" \
-        -F "workflow_path=$workflow_path")
     echo "[INFO] API call done"
     echo "$response"
 
