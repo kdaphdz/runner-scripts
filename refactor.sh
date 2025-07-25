@@ -34,7 +34,7 @@ function refactor_from_github {
             -F "repo_url=$repo_url" \
             -F "branch=$branch" \
             -F "github_token=$github_token" \
-            -F "commit_sha=$commit_sha")
+            -F "base_commit=$commit_sha")
     fi
     echo "[INFO] API call done"
     echo "$response"
