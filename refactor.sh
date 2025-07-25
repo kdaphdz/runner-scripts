@@ -22,9 +22,9 @@ function refactor_from_github {
     echo "[INFO] Starting refactor_from_github for repo: $repo_url branch: $branch"
 
     response=$(curl -s -X POST "$SERVER_URL/refactor_from_github" \
-        -F "repo_url=$repo_url" \
-        -F "branch=$branch" \
-        -F "github_token=$github_token" )
+        -F "repo_url=https://github.com/kdaphdz/exception-handling.git" \
+        -F "branch=main" \
+        -F "github_token=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")
 
     # Extraer mensaje y URL de branch sin usar jq
     message=$(echo "$response" | sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
