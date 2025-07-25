@@ -155,24 +155,30 @@ function end_measurement {
         -F "timer_end=$end_time" \
         "${upload_fields[@]}" \
         -F "original_name=$ORIGINAL_NAME")
-
+    
     summary_md=$(echo "$response" | sed -n 's/.*"summary_md": *"\([^"]*\)".*/\1/p' | sed 's/\\n/\n/g' | sed 's/\\"/"/g')
-
+    
+    json_content=$(echo "$response" | sed -n 's/.*"json_content":\({.*}\)[,}].*/\1/p')
+    
+    # Guardar json_content en archivo
+    echo "$json_content" > ecops-json-content.json
+    echo "[INFO] json_content saved to ecops-json-content.json"
+    
+    # Resto igual...
     local repo="${WATTSCI_REPOSITORY}"
     local branch="${WATTSCI_BRANCH}"
     local workflow="${WATTSCI_WORKFLOW_ID}"
-
+    
     local start_date="2025-07-02"
     local end_date="2025-07-10"
-
+    
     local url="http://localhost:3000/wattsci?repo=${repo}&branch=${branch}&workflow=${workflow}&start_date=${start_date}&end_date=${end_date}"
     summary_md="${summary_md}\n\n[Ver resultados en Wattsci](${url})"
-
+    
     REPORT_MD="ecops-summary.md"
     echo -e "$summary_md" > "$REPORT_MD"
     echo "[INFO] Markdown report generated at: $REPORT_MD"
     
-    # Suponiendo que $response contiene JSON completo, guardamos el JSON raw:
     REPORT_JSON="ecops-summary.json"
     echo "$response" > "$REPORT_JSON"
     echo "[INFO] JSON report saved at: $REPORT_JSON"
