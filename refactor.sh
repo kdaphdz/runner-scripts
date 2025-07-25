@@ -4,7 +4,7 @@ set -euo pipefail
 source "$(dirname "$0")/vars.sh"
 read_vars
 
-SERVER_URL="http://172.24.106.15:8000"  # Cambia el puerto si es necesario
+SERVER_URL="http://172.24.106.15:8000"
 OUTPUT_DIR="/tmp/refactor"
 mkdir -p "$OUTPUT_DIR"
 
