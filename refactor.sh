@@ -24,8 +24,7 @@ function refactor_from_github {
     response=$(curl -s -X POST "$SERVER_URL/refactor_from_github" \
         -F "repo_url=$repo_url" \
         -F "branch=$branch" \
-        -F "github_token=$github_token" \
-        -F "workflow_path=$workflow_path")
+        -F "github_token=$github_token" )
 
     # Extraer mensaje y URL de branch sin usar jq
     message=$(echo "$response" | sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
