@@ -1,51 +1,48 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "$(dirname "$0")/vars.sh"
-read_vars
-
-SERVER_URL="http://172.24.106.15:8000"
+REFACTOR_API="http://172.24.106.15:8000"
+COMPARE_API="http://172.24.106.15:5000"
 OUTPUT_DIR="/tmp/refactor"
 mkdir -p "$OUTPUT_DIR"
 
 function refactor_from_github {
-    if [[ $# -lt 2 ]]; then
-        echo "[ERROR] Usage: $0 refactor_from_github <repo_url> <branch> [github_token] [workflow_path] [commit_sha]" >&2
+    if [[ $# -lt 3 ]]; then
+        echo "[ERROR] Usage: $0 refactor_from_github <repo_url> <branch> <github_token> [workflow_path] [commit_sha]" >&2
         exit 1
     fi
 
     local repo_url="$1"
-    local branch="${2:-main}"
-    local github_token="${3:-}"
+    local branch="$2"
+    local github_token="$3"
     local workflow_path="${4:-.github/workflows/benchmark.yml}"
-    local commit_sha="${5:-}"  # nuevo parámetro opcional
+    local commit_sha="${5:-}"
 
     echo "[INFO] Starting refactor_from_github for repo: $repo_url branch: $branch commit: $commit_sha"
 
-    echo "[INFO] Calling API with repo_url=$repo_url branch=$branch commit_sha=$commit_sha"
-    # Pasamos commit_sha solo si existe
     if [[ -z "$commit_sha" ]]; then
-        response=$(curl -s -X POST "$SERVER_URL/refactor_from_github" \
-            -F "repo_url=$repo_url" \
-            -F "branch=$branch" \
-            -F "github_token=$github_token")
-    else
-        response=$(curl -s -X POST "$SERVER_URL/refactor_from_github" \
+        response=$(curl -s -X POST "$REFACTOR_API/refactor_from_github" \
             -F "repo_url=$repo_url" \
             -F "branch=$branch" \
             -F "github_token=$github_token" \
+            -F "workflow_path=$workflow_path")
+    else
+        response=$(curl -s -X POST "$REFACTOR_API/refactor_from_github" \
+            -F "repo_url=$repo_url" \
+            -F "branch=$branch" \
+            -F "github_token=$github_token" \
+            -F "workflow_path=$workflow_path" \
             -F "base_commit=$commit_sha")
     fi
-    echo "[INFO] API call done"
+
+    echo "[INFO] API response received"
     echo "$response"
 
-    # Extraer mensaje y URL de branch sin usar jq
     message=$(echo "$response" | sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
     branch_url=$(echo "$response" | sed -n 's/.*"branch_url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
     base_sha=$(echo "$response" | sed -n 's/.*"base_commit_sha"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
     refactor_sha=$(echo "$response" | sed -n 's/.*"refactor_commit_sha"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
 
-    # Extraer logs array as raw text (simplificado, puede necesitar ajustes)
     logs=$(echo "$response" | sed -n 's/.*"transformations"[[:space:]]*:[[:space:]]*\[\(.*\)\][[:space:]]*,.*/\1/p' | sed 's/\\n/\n/g' | sed 's/\\"/"/g' | tr -d '[]"')
 
     echo -e "Message: $message"
@@ -54,17 +51,52 @@ function refactor_from_github {
     echo -e "Refactor SHA: $refactor_sha"
     echo -e "Transformations:\n$logs"
 
-    # Guardar resultados
     echo -e "Message: $message\nBranch URL: $branch_url\nBase SHA: $base_sha\nRefactor SHA: $refactor_sha\nTransformations:\n$logs" > "$OUTPUT_DIR/refactor-summary.txt"
     echo "$response" > "$OUTPUT_DIR/refactor-response.json"
 
-    echo "[INFO] Refactor summary saved to $OUTPUT_DIR/refactor-summary.txt"
-    echo "[INFO] Full JSON response saved to $OUTPUT_DIR/refactor-response.json"
+    echo "[INFO] Summary saved to $OUTPUT_DIR"
+}
+
+function compare_with_main {
+    if [[ $# -ne 4 ]]; then
+        echo "[ERROR] Usage: $0 compare_with_main <repo_url> <base_commit> <refactor_commit> <github_token>" >&2
+        exit 1
+    fi
+
+    local repo_url="$1"
+    local base_commit="$2"
+    local refactor_commit="$3"
+    local github_token="$4"
+
+    # Extract owner and repo name from URL
+    if [[ "$repo_url" =~ github\.com[:/]+([^/]+)/([^/.]+)(\.git)? ]]; then
+        repo_owner="${BASH_REMATCH[1]}"
+        repo_name="${BASH_REMATCH[2]}"
+    else
+        echo "[ERROR] Could not parse repo_url: $repo_url" >&2
+        exit 1
+    fi
+
+    echo "[INFO] Comparing $base_commit vs $refactor_commit in $repo_owner/$repo_name"
+
+    response=$(curl -s -X POST "$COMPARE_API/compare_with_main" \
+        -F "repo_owner=$repo_owner" \
+        -F "repo_name=$repo_name" \
+        -F "base_commit=$base_commit" \
+        -F "refactor_commit=$refactor_commit" \
+        -F "github_token=$github_token")
+
+    echo "[INFO] API response:"
+    echo "$response"
+
+    echo "$response" > "$OUTPUT_DIR/compare-response.json"
+    echo "[INFO] Comparison saved to $OUTPUT_DIR/compare-response.json"
 }
 
 function show_usage {
     echo "Usage:"
-    echo "  $0 refactor_from_github <repo_url> <branch> [github_token] [workflow_path] [commit_sha]"
+    echo "  $0 refactor_from_github <repo_url> <branch> <github_token> [workflow_path] [commit_sha]"
+    echo "  $0 compare_with_main <repo_url> <base_commit> <refactor_commit> <github_token>"
     exit 1
 }
 
@@ -80,8 +112,12 @@ case "$option" in
     refactor_from_github)
         refactor_from_github "$@"
         ;;
+    compare_with_main)
+        compare_with_main "$@"
+        ;;
     *)
         echo "[ERROR] Invalid option: $option"
         show_usage
         ;;
 esac
+
