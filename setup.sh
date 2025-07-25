@@ -168,13 +168,14 @@ function end_measurement {
     local url="http://localhost:3000/wattsci?repo=${repo}&branch=${branch}&workflow=${workflow}&start_date=${start_date}&end_date=${end_date}"
     summary_md="${summary_md}\n\n[Ver resultados en Wattsci](${url})"
 
-    REPORT_FILE="ecops-summary.md"
-    echo -e "$summary_md" > "$REPORT_FILE"
-    echo "[INFO] Markdown report generated at: $REPORT_FILE"
+    REPORT_MD="ecops-summary.md"
+    echo -e "$summary_md" > "$REPORT_MD"
+    echo "[INFO] Markdown report generated at: $REPORT_MD"
     
-    REPORT_FILE="ecops-summary.md"
-    echo -e "$summary_md" > "$REPORT_FILE"
-    echo "[INFO] Markdown report generated at: $REPORT_FILE"
+    # Suponiendo que $response contiene JSON completo, guardamos el JSON raw:
+    REPORT_JSON="ecops-summary.json"
+    echo "$response" > "$REPORT_JSON"
+    echo "[INFO] JSON report saved at: $REPORT_JSON"
 }
 
 function baseline {
