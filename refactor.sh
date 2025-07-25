@@ -24,29 +24,7 @@ function refactor_from_github {
         -F "repo_url=$repo_url" \
         -F "branch=$branch" \
         -F "github_token=$github_token" \
-        -F "workflow_path=$workflow_path" \
-        -F "base_branch=$base_branch")
-
-    echo "[INFO] API response received"
-    echo "$response"
-
-    message=$(echo "$response" | sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
-    branch_url=$(echo "$response" | sed -n 's/.*"branch_url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
-    base_sha=$(echo "$response" | sed -n 's/.*"base_commit_sha"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
-    refactor_sha=$(echo "$response" | sed -n 's/.*"refactor_commit_sha"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
-
-    logs=$(echo "$response" | sed -n 's/.*"transformations"[[:space:]]*:[[:space:]]*\[\(.*\)\][[:space:]]*,.*/\1/p' | sed 's/\\n/\n/g' | sed 's/\\"/"/g' | tr -d '[]"')
-
-    echo -e "Message: $message"
-    echo -e "Branch URL: $branch_url"
-    echo -e "Base SHA: $base_sha"
-    echo -e "Refactor SHA: $refactor_sha"
-    echo -e "Transformations:\n$logs"
-
-    echo -e "Message: $message\nBranch URL: $branch_url\nBase SHA: $base_sha\nRefactor SHA: $refactor_sha\nTransformations:\n$logs" > "$OUTPUT_DIR/refactor-summary.txt"
-    echo "$response" > "$OUTPUT_DIR/refactor-response.json"
-
-    echo "[INFO] Summary saved to $OUTPUT_DIR"
+        -F "workflow_path=$workflow_path" )
 }
 
 function compare_with_main {
