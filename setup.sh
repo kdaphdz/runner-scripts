@@ -5,7 +5,7 @@ source "$(dirname "$0")/vars.sh"
 read_vars
 
 OUTPUT_DIR="/tmp/wattsci"
-SERVER_URL="http://172.24.106.20:5000"
+SERVER_URL="http://172.24.106.15:5000"
 PID_FILE="$OUTPUT_DIR/perf.pid"
 TIMER_FILE_START="$OUTPUT_DIR/timer_start.txt"
 TIMER_FILE_END="$OUTPUT_DIR/timer_end.txt"
