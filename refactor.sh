@@ -10,7 +10,7 @@ mkdir -p "$OUTPUT_DIR"
 
 function refactor_from_github {
     if [[ $# -lt 2 ]]; then
-        echo "[ERROR] Usage: $0 refactor_from_github <repo_url> <branch> [github_token] [workflow_path]" >&2
+        echo "[ERROR] Usage: $0 refactor_from_github <repo_url> <branch> [github_token] [workflow_path] [commit_sha]" >&2
         exit 1
     fi
 
@@ -18,14 +18,24 @@ function refactor_from_github {
     local branch="${2:-main}"
     local github_token="${3:-}"
     local workflow_path="${4:-.github/workflows/benchmark.yml}"
+    local commit_sha="${5:-}"  # nuevo parámetro opcional
 
-    echo "[INFO] Starting refactor_from_github for repo: $repo_url branch: $branch"
+    echo "[INFO] Starting refactor_from_github for repo: $repo_url branch: $branch commit: $commit_sha"
 
-    echo "[INFO] Calling API with repo_url=$repo_url branch=$branch"
-    response=$(curl -X POST "$SERVER_URL/refactor_from_github" \
-        -F "repo_url=$repo_url" \
-        -F "branch=$branch" \
-        -F "github_token=$github_token" )
+    echo "[INFO] Calling API with repo_url=$repo_url branch=$branch commit_sha=$commit_sha"
+    # Pasamos commit_sha solo si existe
+    if [[ -z "$commit_sha" ]]; then
+        response=$(curl -s -X POST "$SERVER_URL/refactor_from_github" \
+            -F "repo_url=$repo_url" \
+            -F "branch=$branch" \
+            -F "github_token=$github_token")
+    else
+        response=$(curl -s -X POST "$SERVER_URL/refactor_from_github" \
+            -F "repo_url=$repo_url" \
+            -F "branch=$branch" \
+            -F "github_token=$github_token" \
+            -F "commit_sha=$commit_sha")
+    fi
     echo "[INFO] API call done"
     echo "$response"
 
@@ -54,7 +64,7 @@ function refactor_from_github {
 
 function show_usage {
     echo "Usage:"
-    echo "  $0 refactor_from_github <repo_url> <branch> [github_token] [workflow_path]"
+    echo "  $0 refactor_from_github <repo_url> <branch> [github_token] [workflow_path] [commit_sha]"
     exit 1
 }
 
