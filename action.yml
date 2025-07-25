@@ -1,12 +1,12 @@
 name: EcOps Script Runner
-description: Start or end performance measurement using perf
+description: Start or end performance measurement using perf or trigger refactorization
 
 inputs:
   method:
-    description: 'Method to use (start_measurement, end_measurement)'
+    description: 'Method to use (start_measurement, end_measurement, refactor)'
     required: true
   args:
-    description: 'Extra arguments for perf (e.g., perf cpu-cycles instructions 1000)'
+    description: 'Extra arguments for perf or refactor (e.g., for perf: perf cpu-cycles instructions 1000; for refactor: repo_url branch github_token workflow_path)'
     required: false
 
 runs:
@@ -14,15 +14,21 @@ runs:
   steps:
     - run: |
         chmod +x "$GITHUB_ACTION_PATH/setup.sh"
-        "$GITHUB_ACTION_PATH/setup.sh" ${{ inputs.method }} \
-          "${{ github.run_id }}" \
-          "${{ github.ref_name }}" \
-          "${{ github.repository }}" \
-          "${{ github.run_id }}" \
-          "${{ github.workflow }}" \
-          "${{ github.sha }}" \
-          "${{ github.event_name }}" \
-          ${{ inputs.args }}
+        chmod +x "$GITHUB_ACTION_PATH/refactor.sh"
+        if [[ "${{ inputs.method }}" == "refactor" ]]; then
+          echo "[INFO] Running refactor.sh with args: ${{ inputs.args }}"
+          "$GITHUB_ACTION_PATH/refactor.sh" refactor_from_github ${{ inputs.args }}
+        else
+          "$GITHUB_ACTION_PATH/setup.sh" ${{ inputs.method }} \
+            "${{ github.run_id }}" \
+            "${{ github.ref_name }}" \
+            "${{ github.repository }}" \
+            "${{ github.run_id }}" \
+            "${{ github.workflow }}" \
+            "${{ github.sha }}" \
+            "${{ github.event_name }}" \
+            ${{ inputs.args }}
+        fi
       shell: bash
 
     - name: Show EcOps Markdown Report
@@ -31,4 +37,3 @@ runs:
         echo "### EcOps Performance Report" >> $GITHUB_STEP_SUMMARY
         cat ecops-summary.md >> $GITHUB_STEP_SUMMARY
       shell: bash
-
