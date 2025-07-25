@@ -20,7 +20,7 @@ function refactor_from_github {
 
     echo "[INFO] Starting refactor_from_github for repo: $repo_url branch: $branch base_branch: $base_branch"
 
-    response=$(curl -s -X POST "$REFACTOR_API/refactor_from_github" \
+    response=$(curl -s -X POST "$REFACTOR_API/wattsci/compare" \
         -F "repo_url=$repo_url" \
         -F "branch=$branch" \
         -F "github_token=$github_token" \
