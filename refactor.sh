@@ -59,13 +59,13 @@ function refactor_from_github {
 
 function compare_with_main {
     if [[ $# -ne 4 ]]; then
-        echo "[ERROR] Usage: $0 compare_with_main <repo_url> <base_commit> <refactor_commit> <github_token>" >&2
+        echo "[ERROR] Usage: $0 compare_with_main <repo_url> <base_branch> <refactor_branch> <github_token>" >&2
         exit 1
     fi
 
     local repo_url="$1"
-    local base_commit="$2"
-    local refactor_commit="$3"
+    local base_branch="$2"
+    local refactor_branch="$3"
     local github_token="$4"
 
     # Extraer "owner/name" del repo_url
@@ -76,12 +76,12 @@ function compare_with_main {
         exit 1
     fi
 
-    echo "[INFO] Comparing $base_commit vs $refactor_commit in repo $repo"
+    echo "[INFO] Comparing branches $base_branch vs $refactor_branch in repo $repo"
 
-    response=$(curl -s -X POST "$COMPARE_API/wattsci/compare" \
-        -F "repo=$repo" \
-        -F "base_commit=$base_commit" \
-        -F "refactor_commit=$refactor_commit" \
+    response=$(curl -s -X POST "$COMPARE_API/compare_with_main" \
+        -F "repo_url=$repo_url" \
+        -F "base_branch=$base_branch" \
+        -F "new_branch=$refactor_branch" \
         -F "github_token=$github_token")
 
     echo "[INFO] API response:"
