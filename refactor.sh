@@ -38,7 +38,7 @@ function compare_with_main {
     local refactor_branch="$3"
     local github_token="$4"
 
-    echo "[INFO] Comparing branches $base_branch vs $refactor_branch in repo $repo"
+    echo "[INFO] Comparing branches $base_branch vs $refactor_branch in repo $repo_url"
 
     response=$(curl -s -X POST "$COMPARE_API/wattsci/compare" \
         -F "repo=$repo_url" \
