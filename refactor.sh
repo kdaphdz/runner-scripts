@@ -38,14 +38,6 @@ function compare_with_main {
     local refactor_branch="$3"
     local github_token="$4"
 
-    # Extraer "owner/name" del repo_url
-    if [[ "$repo_url" =~ github\.com[:/]+([^/]+/[^/.]+)(\.git)? ]]; then
-        repo="${BASH_REMATCH[1]}"
-    else
-        echo "[ERROR] Could not parse repo_url: $repo_url" >&2
-        exit 1
-    fi
-
     echo "[INFO] Comparing branches $base_branch vs $refactor_branch in repo $repo"
 
     response=$(curl -s -X POST "$COMPARE_API/wattsci/compare" \
