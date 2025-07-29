@@ -50,7 +50,10 @@ function start_measurement {
 
             local SESSION_NAME="wattsci_$(date +%s)"
 
-            echo "bash '$(dirname "$0")/perf.sh' ${perf_events[*]} $interval_ms > '$OUTPUT_DIR/perf.log' 2>&1 & echo \$! > '$PID_FILE'" | at now
+            nohup bash "$(dirname "$0")/perf.sh" "${perf_events[@]}" "$interval_ms" > "$OUTPUT_DIR/perf.log" 2>&1 < /dev/null &
+            perf_pid=$!
+            disown $perf_pid
+            echo $perf_pid > "$PID_FILE"
 
             echo "$SESSION_NAME" > "$PID_FILE"
             echo "[INFO] Measurement running in tmux session: $SESSION_NAME"
