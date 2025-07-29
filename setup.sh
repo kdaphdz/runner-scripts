@@ -43,22 +43,21 @@ function start_measurement {
         perf)
             local interval_ms="${args[-1]}"
             local perf_events=("${args[@]:0:${#args[@]}-1}")
-
-            bash "$(dirname "$0")/perf.sh" "${perf_events[@]}" "$interval_ms" < /dev/null 2>&1 &
-
-            local parent_pid=$!
-            sleep 1
-            local child_pid
-            child_pid=$(pgrep -P "$parent_pid" -n)
-
-            if [[ -z "$child_pid" ]]; then
-                echo "[ERROR] Failed to detect perf child process PID" >&2
-                kill "$parent_pid" || true
+    
+            echo "[INFO] Launching perf.sh with events: ${perf_events[*]}, interval: ${interval_ms}ms"
+    
+            nohup setsid bash "$(dirname "$0")/perf.sh" "${perf_events[@]}" "$interval_ms" > "$OUTPUT_DIR/perf.log" 2>&1 &
+            local perf_pid=$!
+    
+            sleep 1  # da tiempo a que arranque bien
+    
+            if ! kill -0 "$perf_pid" 2>/dev/null; then
+                echo "[ERROR] perf process did not start correctly (PID=$perf_pid)" >&2
                 exit 1
             fi
-
-            echo "$child_pid" > "$PID_FILE"
-            echo "[INFO] Measurement running with PID $child_pid"
+    
+            echo "$perf_pid" > "$PID_FILE"
+            echo "[INFO] Measurement running with PID $perf_pid"
             ;;
         *)
             echo "[ERROR] Unsupported method: $method" >&2
