@@ -46,7 +46,8 @@ function start_measurement {
     
             echo "[INFO] Launching perf.sh with events: ${perf_events[*]}, interval: ${interval_ms}ms"
     
-            nohup setsid bash "$(dirname "$0")/perf.sh" "${perf_events[@]}" "$interval_ms" > "$OUTPUT_DIR/perf.log" 2>&1 &
+            nohup setsid bash "$(dirname "$0")/perf.sh" "${perf_events[@]}" "$interval_ms" > "$OUTPUT_DIR/perf.log" 2>&1 < /dev/null &
+
             local perf_pid=$!
     
             sleep 1  # da tiempo a que arranque bien
