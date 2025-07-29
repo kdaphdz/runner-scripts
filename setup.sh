@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+command -v tmux >/dev/null 2>&1 || { echo >&2 "[ERROR] tmux is required but not installed."; exit 1; }
+
 source "$(dirname "$0")/vars.sh"
 read_vars
 
@@ -43,22 +45,15 @@ function start_measurement {
         perf)
             local interval_ms="${args[-1]}"
             local perf_events=("${args[@]:0:${#args[@]}-1}")
-    
-            echo "[INFO] Launching perf.sh with events: ${perf_events[*]}, interval: ${interval_ms}ms"
-    
-            nohup setsid bash "$(dirname "$0")/perf.sh" "${perf_events[@]}" "$interval_ms" > "$OUTPUT_DIR/perf.log" 2>&1 < /dev/null &
 
-            local perf_pid=$!
-    
-            sleep 1  # da tiempo a que arranque bien
-    
-            if ! kill -0 "$perf_pid" 2>/dev/null; then
-                echo "[ERROR] perf process did not start correctly (PID=$perf_pid)" >&2
-                exit 1
-            fi
-    
-            echo "$perf_pid" > "$PID_FILE"
-            echo "[INFO] Measurement running with PID $perf_pid"
+            echo "[INFO] Launching perf.sh with events: ${perf_events[*]}, interval: ${interval_ms}ms"
+
+            local SESSION_NAME="wattsci_$(date +%s)"
+
+            tmux new-session -d -s "$SESSION_NAME" "bash '$(dirname "$0")/perf.sh' ${perf_events[*]} $interval_ms"
+
+            echo "$SESSION_NAME" > "$PID_FILE"
+            echo "[INFO] Measurement running in tmux session: $SESSION_NAME"
             ;;
         *)
             echo "[ERROR] Unsupported method: $method" >&2
@@ -84,14 +79,15 @@ function end_measurement {
     date "+%s%6N" >> "$TIMER_FILE_END"
     echo "[INFO] Timer end recorded at $(tail -n 1 "$TIMER_FILE_END")"
 
-    local pid
-    pid=$(<"$PID_FILE")
+    local SESSION_NAME
+    SESSION_NAME=$(<"$PID_FILE")
 
-    if kill "$pid" 2>/dev/null; then
-        echo "[INFO] Stopped measurement process PID=$pid"
+    if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+        tmux kill-session -t "$SESSION_NAME"
+        echo "[INFO] Stopped tmux session: $SESSION_NAME"
         rm -f "$PID_FILE"
     else
-        echo "[ERROR] Failed to stop process PID=$pid"
+        echo "[ERROR] tmux session not found: $SESSION_NAME"
         rm -f "$PID_FILE"
         exit 1
     fi
@@ -102,7 +98,6 @@ function end_measurement {
     fi
 
     ORIGINAL_NAME=$(basename "$WATTSCI_OUTPUT_FILE")
-
     COMPRESSED_FILE="$OUTPUT_DIR/${ORIGINAL_NAME}.gz"
     gzip -c "$WATTSCI_OUTPUT_FILE" > "$COMPRESSED_FILE"
     echo "[INFO] Compressed perf output saved to: $COMPRESSED_FILE"
@@ -137,7 +132,6 @@ function end_measurement {
             -F "chunk=@${chunk}" \
             -F "chunk_name=$(basename "$chunk")" \
             "${upload_fields[@]}")
-
         echo " - Server response: $resp"
 
         if [[ -z "$session_id" ]]; then
@@ -155,30 +149,25 @@ function end_measurement {
         -F "timer_end=$end_time" \
         "${upload_fields[@]}" \
         -F "original_name=$ORIGINAL_NAME")
-    
+
     summary_md=$(echo "$response" | sed -n 's/.*"summary_md": *"\([^"]*\)".*/\1/p' | sed 's/\\n/\n/g' | sed 's/\\"/"/g')
-    
     json_content=$(echo "$response" | sed -n 's/.*"json_content":\({.*}\)[,}].*/\1/p')
-    
-    # Guardar json_content en archivo
+
     echo "$json_content" > ecops-json-content.json
     echo "[INFO] json_content saved to ecops-json-content.json"
-    
-    # Resto igual...
+
     local repo="${WATTSCI_REPOSITORY}"
     local branch="${WATTSCI_BRANCH}"
     local workflow="${WATTSCI_WORKFLOW_ID}"
-    
     local start_date="2025-07-02"
     local end_date="2025-07-10"
-    
     local url="http://localhost:3000/wattsci?repo=${repo}&branch=${branch}&workflow=${workflow}&start_date=${start_date}&end_date=${end_date}"
     summary_md="${summary_md}\n\n[Ver resultados en Wattsci](${url})"
-    
+
     REPORT_MD="ecops-summary.md"
     echo -e "$summary_md" > "$REPORT_MD"
     echo "[INFO] Markdown report generated at: $REPORT_MD"
-    
+
     REPORT_JSON="ecops-summary.json"
     echo "$response" > "$REPORT_JSON"
     echo "[INFO] JSON report saved at: $REPORT_JSON"
@@ -224,3 +213,4 @@ case "$option" in
         show_usage
         ;;
 esac
+
