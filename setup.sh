@@ -216,4 +216,11 @@ case "$option" in
         end_measurement "$@"
         ;;
     baseline)
+        baseline "$@"
+        ;;
+    *)
+        echo "[ERROR] Invalid option: $option"
+        show_usage
+        ;;
+esac
 
