@@ -11,7 +11,7 @@ TIMER_FILE_START="$OUTPUT_DIR/timer_start.txt"
 TIMER_FILE_END="$OUTPUT_DIR/timer_end.txt"
 
 function start_measurement {
-    if [[ $# -lt 2 ]]; then
+    if [[ $# -lt 1 ]]; then
         echo "[ERROR] Missing arguments for start_measurement" >&2
         show_usage
     fi
@@ -26,16 +26,16 @@ function start_measurement {
     echo "[INFO] Timer start recorded at $(tail -n 1 "$TIMER_FILE_START")"
 
     # Leer variables de GitHub Actions del entorno
-    add_var 'WATTSCI_RUN_ID' "${GITHUB_RUN_ID}"
-    add_var 'WATTSCI_BRANCH' "${GITHUB_REF_NAME}"
-    add_var 'WATTSCI_REPOSITORY' "${GITHUB_REPOSITORY}"
-    add_var 'WATTSCI_WORKFLOW_ID' "${GITHUB_WORKFLOW}"
-    add_var 'WATTSCI_WORKFLOW_NAME' "${GITHUB_WORKFLOW}"
-    add_var 'WATTSCI_COMMIT_HASH' "${GITHUB_SHA}"
-    add_var 'WATTSCI_SOURCE' "${GITHUB_EVENT_NAME}"
-    
-    # Primer argumento sigue siendo el método (perf, etc.)
-    local method="${1:-}"
+    add_var 'WATTSCI_RUN_ID' "${GITHUB_RUN_ID:-unknown}"
+    add_var 'WATTSCI_BRANCH' "${GITHUB_REF_NAME:-unknown}"
+    add_var 'WATTSCI_REPOSITORY' "${GITHUB_REPOSITORY:-unknown}"
+    add_var 'WATTSCI_WORKFLOW_ID' "${GITHUB_WORKFLOW:-unknown}"
+    add_var 'WATTSCI_WORKFLOW_NAME' "${GITHUB_WORKFLOW:-unknown}"
+    add_var 'WATTSCI_COMMIT_HASH' "${GITHUB_SHA:-unknown}"
+    add_var 'WATTSCI_SOURCE' "${GITHUB_EVENT_NAME:-unknown}"
+
+    # Primer argumento es el método (perf, etc.)
+    local method="$1"
     shift 1
     local args=("$@")
 
@@ -43,7 +43,9 @@ function start_measurement {
 
     case "$method" in
         perf)
+            # Último argumento es el intervalo
             local interval_ms="${args[-1]}"
+            # Todos los anteriores son eventos
             local perf_events=("${args[@]:0:${#args[@]}-1}")
 
             bash "$(dirname "$0")/perf.sh" "${perf_events[@]}" "$interval_ms" < /dev/null 2>&1 &
@@ -159,28 +161,23 @@ function end_measurement {
         -F "original_name=$ORIGINAL_NAME")
     
     summary_md=$(echo "$response" | sed -n 's/.*"summary_md": *"\([^"]*\)".*/\1/p' | sed 's/\\n/\n/g' | sed 's/\\"/"/g')
-    
     json_content=$(echo "$response" | sed -n 's/.*"json_content":\({.*}\)[,}].*/\1/p')
-    
-    # Guardar json_content en archivo
+
     echo "$json_content" > ecops-json-content.json
     echo "[INFO] json_content saved to ecops-json-content.json"
-    
-    # Resto igual...
+
     local repo="${WATTSCI_REPOSITORY}"
     local branch="${WATTSCI_BRANCH}"
     local workflow="${WATTSCI_WORKFLOW_ID}"
-    
     local start_date="2025-07-02"
     local end_date="2025-07-10"
-    
     local url="http://localhost:3000/wattsci?repo=${repo}&branch=${branch}&workflow=${workflow}&start_date=${start_date}&end_date=${end_date}"
     summary_md="${summary_md}\n\n[Ver resultados en Wattsci](${url})"
-    
+
     REPORT_MD="ecops-summary.md"
     echo -e "$summary_md" > "$REPORT_MD"
     echo "[INFO] Markdown report generated at: $REPORT_MD"
-    
+
     REPORT_JSON="ecops-summary.json"
     echo "$response" > "$REPORT_JSON"
     echo "[INFO] JSON report saved at: $REPORT_JSON"
@@ -219,10 +216,4 @@ case "$option" in
         end_measurement "$@"
         ;;
     baseline)
-        baseline "$@"
-        ;;
-    *)
-        echo "[ERROR] Invalid option: $option"
-        show_usage
-        ;;
-esac
+
