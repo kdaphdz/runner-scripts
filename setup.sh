@@ -25,16 +25,18 @@ function start_measurement {
     date "+%s%6N" >> "$TIMER_FILE_START"
     echo "[INFO] Timer start recorded at $(tail -n 1 "$TIMER_FILE_START")"
 
-    add_var 'WATTSCI_RUN_ID' "$1"
-    add_var 'WATTSCI_BRANCH' "$2"
-    add_var 'WATTSCI_REPOSITORY' "$3"
-    add_var 'WATTSCI_WORKFLOW_ID' "$4"
-    add_var 'WATTSCI_WORKFLOW_NAME' "$5"
-    add_var 'WATTSCI_COMMIT_HASH' "$6"
-    add_var 'WATTSCI_SOURCE' "$7"
-
-    local method="$8"
-    shift 8
+    # Leer variables de GitHub Actions del entorno
+    add_var 'WATTSCI_RUN_ID' "${GITHUB_RUN_ID}"
+    add_var 'WATTSCI_BRANCH' "${GITHUB_REF_NAME}"
+    add_var 'WATTSCI_REPOSITORY' "${GITHUB_REPOSITORY}"
+    add_var 'WATTSCI_WORKFLOW_ID' "${GITHUB_WORKFLOW}"
+    add_var 'WATTSCI_WORKFLOW_NAME' "${GITHUB_WORKFLOW}"
+    add_var 'WATTSCI_COMMIT_HASH' "${GITHUB_SHA}"
+    add_var 'WATTSCI_SOURCE' "${GITHUB_EVENT_NAME}"
+    
+    # Primer argumento sigue siendo el método (perf, etc.)
+    local method="${1:-}"
+    shift 1
     local args=("$@")
 
     add_var 'WATTSCI_METHOD' "$method"
