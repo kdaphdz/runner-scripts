@@ -4,6 +4,9 @@ set -euo pipefail
 source "$(dirname "$0")/vars.sh"
 read_vars
 
+source "$(dirname "$0")/ci_vars.sh"
+load_ci_vars
+
 OUTPUT_DIR="/tmp/wattsci"
 SERVER_URL="http://172.24.106.15:5000"
 PID_FILE="$OUTPUT_DIR/perf.pid"
@@ -25,16 +28,6 @@ function start_measurement {
     date "+%s%6N" >> "$TIMER_FILE_START"
     echo "[INFO] Timer start recorded at $(tail -n 1 "$TIMER_FILE_START")"
 
-    # Leer variables de GitHub Actions del entorno
-    add_var 'WATTSCI_RUN_ID' "${GITHUB_RUN_ID:-unknown}"
-    add_var 'WATTSCI_BRANCH' "${GITHUB_REF_NAME:-unknown}"
-    add_var 'WATTSCI_REPOSITORY' "${GITHUB_REPOSITORY:-unknown}"
-    add_var 'WATTSCI_WORKFLOW_ID' "${GITHUB_WORKFLOW:-unknown}"
-    add_var 'WATTSCI_WORKFLOW_NAME' "${GITHUB_WORKFLOW:-unknown}"
-    add_var 'WATTSCI_COMMIT_HASH' "${GITHUB_SHA:-unknown}"
-    add_var 'WATTSCI_SOURCE' "${GITHUB_EVENT_NAME:-unknown}"
-
-    # Primer argumento es el método (perf, etc.)
     local method="$1"
     shift 1
     local args=("$@")
@@ -43,7 +36,6 @@ function start_measurement {
 
     case "$method" in
         perf)
-            # Último argumento es el intervalo
             local interval_ms="${args[-1]}"
             # Todos los anteriores son eventos
             local perf_events=("${args[@]:0:${#args[@]}-1}")
