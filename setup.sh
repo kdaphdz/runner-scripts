@@ -153,8 +153,7 @@ function end_measurement {
         -F "original_name=$ORIGINAL_NAME")
     
     if [[ "$CI" == "GitHub" && -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
-        echo "hola" >> "$GITHUB_STEP_SUMMARY"
-        echo "[INFO] Added message to GitHub Actions step summary"
+        echo "## Estado de reconstrucción" >> "$GITHUB_STEP_SUMMARY"
     fi
 }
 
