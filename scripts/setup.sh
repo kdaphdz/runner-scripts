@@ -28,11 +28,14 @@ function start_measurement {
     date "+%s%6N" >> "$TIMER_FILE_START"
     echo "[INFO] Timer start recorded at $(tail -n 1 "$TIMER_FILE_START")"
 
+    local label="$1"
+    shift 1
     local method="$1"
     shift 1
     local args=("$@")
-
-    add_var 'WATTSCI_METHOD' "$method"
+    
+    add_var 'LABEL' "$label"
+    add_var 'METHOD' "$method"
 
     case "$method" in
         perf)
@@ -118,6 +121,7 @@ function end_measurement {
         -F "WORKFLOW_NAME=$WORKFLOW_NAME"
         -F "COMMIT_HASH=$COMMIT_HASH"
         -F "METHOD=$WATTSCI_METHOD"
+        -F "LABEL=$LABEL"
     )
 
     if [[ "$baseline_flag" == "true" ]]; then
