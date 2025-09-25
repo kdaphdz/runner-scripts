@@ -120,7 +120,7 @@ function end_measurement {
         -F "WORKFLOW_ID=$WORKFLOW_ID"
         -F "WORKFLOW_NAME=$WORKFLOW_NAME"
         -F "COMMIT_HASH=$COMMIT_HASH"
-        -F "METHOD=$WATTSCI_METHOD"
+        -F "METHOD=$METHOD"
         -F "LABEL=$LABEL"
     )
 
