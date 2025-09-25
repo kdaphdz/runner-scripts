@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source "$(dirname "$0")/vars.sh"
-read_vars
-
 source "$(dirname "$0")/ci_vars.sh"
 load_ci_vars
+
+source "$(dirname "$0")/vars.sh"
+read_vars
 
 OUTPUT_DIR="/tmp/wattsci"
 SERVER_URL="http://172.24.106.15:5000"
