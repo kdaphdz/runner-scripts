@@ -110,14 +110,15 @@ function end_measurement {
     ls -lh "${COMPRESSED_FILE}_chunk_"*
 
     upload_fields=(
-        -F "WATTSCI_RUN_ID=$WATTSCI_RUN_ID"
-        -F "WATTSCI_BRANCH=$WATTSCI_BRANCH"
-        -F "WATTSCI_REPOSITORY=$WATTSCI_REPOSITORY"
-        -F "WATTSCI_WORKFLOW_ID=$WATTSCI_WORKFLOW_ID"
-        -F "WATTSCI_WORKFLOW_NAME=$WATTSCI_WORKFLOW_NAME"
-        -F "WATTSCI_COMMIT_HASH=$WATTSCI_COMMIT_HASH"
-        -F "WATTSCI_SOURCE=$WATTSCI_SOURCE"
-        -F "WATTSCI_METHOD=$WATTSCI_METHOD"
+        -F "CI=$CI"
+        -F "RUN_ID=$RUN_ID"
+        -F "REF_NAME=$REF_NAME"
+        -F "REPOSITORY=$REPOSITORY"
+        -F "WORKFLOW_ID=$WORKFLOW_ID"
+        -F "WORKFLOW_NAME=$WORKFLOW_NAME"
+        -F "COMMIT_HASH=$COMMIT_HASH"
+        -F "SOURCE=$SOURCE"
+        -F "METHOD=$WATTSCI_METHOD"
     )
 
     if [[ "$baseline_flag" == "true" ]]; then
