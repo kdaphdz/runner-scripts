@@ -151,9 +151,22 @@ function end_measurement {
         -F "timer_end=$end_time" \
         "${upload_fields[@]}" \
         -F "original_name=$ORIGINAL_NAME")
+
+    summary_md=$(echo "$response" | grep -oP '"summary_md"\s*:\s*"\K[^"]*')
     
     if [[ "$CI" == "GitHub" && -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
-        echo "## Estado de reconstrucción" >> "$GITHUB_STEP_SUMMARY"
+        {
+            echo "## Reconstruction Status"
+            echo "- Session ID: $session_id"
+            echo "- Original file: $ORIGINAL_NAME"
+            echo "- Timer start: $start_time"
+            echo "- Timer end: $end_time"
+            echo ""
+            if [[ -n "$summary_md" ]]; then
+                echo "### Server Summary"
+                echo "$summary_md"
+            fi
+        } >> "$GITHUB_STEP_SUMMARY"
     fi
 }
 
