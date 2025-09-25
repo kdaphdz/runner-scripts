@@ -59,4 +59,6 @@ function load_ci_vars {
         add_var 'WORKFLOW_NAME' "${BUILD_DEFINITIONNAME:-$BUILD_BUILDID}"
         add_var 'COMMIT_HASH' "${BUILD_SOURCEVERSION}"
     fi
+
+    export CI RUN_ID REF_NAME REPOSITORY WORKFLOW_ID WORKFLOW_NAME COMMIT_HASH
 }
