@@ -158,9 +158,9 @@ function end_measurement {
     echo "$json_content" > ecops-json-content.json
     echo "[INFO] json_content saved to ecops-json-content.json"
 
-    local repo="${WATTSCI_REPOSITORY}"
-    local branch="${WATTSCI_BRANCH}"
-    local workflow="${WATTSCI_WORKFLOW_ID}"
+    local repo="${REPOSITORY}"
+    local branch="${REF_NAME}"
+    local workflow="${WORKFLOW_ID}"
     local start_date="2025-07-02"
     local end_date="2025-07-10"
     local url="http://localhost:3000/wattsci?repo=${repo}&branch=${branch}&workflow=${workflow}&start_date=${start_date}&end_date=${end_date}"
